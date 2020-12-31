@@ -3,6 +3,9 @@
 
 #include "types.h"
 #include "defs.h"
+#include "pci.h"
+
+#define VIRTIO_VENDOR 0x1AF4
 
 void virtio_init(void);
 
