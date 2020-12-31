@@ -27,6 +27,7 @@ OBJS = \
 	uart.o\
 	vectors.o\
 	vm.o\
+	pci.o\
 	virtio.o\
 
 # Cross-compiling (e.g., on Mac OS X)
