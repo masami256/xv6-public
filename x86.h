@@ -12,7 +12,7 @@ inb(ushort port)
 static inline uint
 inl(ushort port)
 {
-  ushort data;
+  uint data;
   asm volatile("in %1, %0" : "=a" (data) : "dN" (port));
   return data;
 }
