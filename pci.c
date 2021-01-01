@@ -12,174 +12,132 @@
 #define PCI_CONFIG_ADDRESS 0x0cf8
 
 // Config Data register range is 0x0cfc - 0x0cff.
-#define CONFIG_DATA_1 0x0cfc
+#define CONFIG_DATA 0x0cfc
+
+#define MAX_PCI_DEVICES 16
+static struct pci_device pci_devices[MAX_PCI_DEVICES];
+uint pci_device_idx;
 
 /**
  * Write data to CONFIG_ADDRESS.
- * @param reg it should be set bus, device, function and so forth.
  */
-static void write_pci_config_address(const struct pci_configuration_register *reg)
+static void write_pci_config_address(uchar bus, uchar dev, uchar func, uchar offset, uchar enable)
 {
 	uint data = 0;
+	uchar reserved = 0;
 
-	data = (reg->enable_bit << 31) |
-		(reg->reserved << 24) | 
-		(reg->bus_num << 16) | 
-		(reg->dev_num << 11) | 
-		(reg->func_num << 8) |
-		reg->reg_num;
+	data = (enable << 31) |
+		(reserved << 24) | 
+		(bus << 16) | 
+		(dev << 11) | 
+		(func << 8) |
+		offset;
 
 	outl(PCI_CONFIG_ADDRESS, data);	
 }
 
-/**
- * Set ENABLE bit to 0 and write data to CONFIG_ADDRESS.
- */
-static void finish_access_to_config_data(struct pci_configuration_register *reg)
+#if 0
+static void finish_access_to_config_data(uchar bus, uchar dev, uchar func, uchar offset)
 {
-	reg->enable_bit = 0;
-	write_pci_config_address(reg);
+	write_pci_config_address(bus, dev, func, offset, 0);
 }
-
+#endif
 
 /**
  * Read CONFIG_DATA.
- * @param reg it should be set bus, device, function and so forth.
- * @return data from CONFIG_DATA.
  */
-static uint read_pci_data(struct pci_configuration_register *reg)
+static uint read_pci_config(uchar bus, uchar dev, uchar func, uchar offset)
 {
 	uint data;
 
-	// Enable bit should be 1 before read PCI_DATA.
-	reg->enable_bit = 1;
-
 	// write data to CONFIG_ADDRESS.
-	write_pci_config_address(reg);
+	write_pci_config_address(bus, dev, func, offset, 1);
 	
-	data = inl(CONFIG_DATA_1);
-
-	finish_access_to_config_data(reg);
+	data = inl(CONFIG_DATA);
 
 	return data;
 }
 
-/**
- * Read pci class.
- * @param reg it should be set bus, device, function and so forth.
- * @return PCI class.
- */
-static uint read_pci_class(struct pci_configuration_register *reg)
+static void setup_pci_device(uint bus, uint dev)
 {
-	reg->reg_num = 0x8;
-	return read_pci_data(reg);
+	uint tmp;
+	uint func = 0;
+	struct pci_device *p = &pci_devices[pci_device_idx];
+
+	tmp = read_pci_config(bus, dev, func, 0);
+	
+	p->vendor_id = tmp & 0xffff;
+	if (p->vendor_id == 0xffff) 
+		return ;
+
+	p->device_id = (tmp >> 16) & 0xffff;
+
+	tmp = read_pci_config(bus, dev, func, 0x04);
+	p->command = tmp & 0xffff;
+	p->status = (tmp >> 16) & 0xfff;
+
+	tmp = read_pci_config(bus, dev, func, 0x08);
+	p->class = (tmp >> 24) & 0xff;
+	p->subclass = (tmp >> 16) & 0xff;
+
+	tmp = read_pci_config(bus, dev, func, 0x0c);
+	p->header_type = (tmp >> 16) & 0xff;
+
+	p->bar0 = read_pci_config(bus, dev, func, 0x10);
+	p->bar1 = read_pci_config(bus, dev, func, 0x14);
+	p->bar2 = read_pci_config(bus, dev, func, 0x18);
+	p->bar3 = read_pci_config(bus, dev, func, 0x1c);
+	p->bar4 = read_pci_config(bus, dev, func, 0x20);
+	p->bar5 = read_pci_config(bus, dev, func, 0x24);
+
+	tmp = read_pci_config(bus, dev, func, 0x2c);
+	p->subsystem_vendor_id = tmp & 0xffff;
+	p->subsystem_id = (tmp >> 16) & 0xffff;
+
+	pci_device_idx++;
 }
 
-/**
- * Read CONFIG_DATA by register 0x00.
- * @param reg it should be set bus, device, function and so forth.
- * @return vendor id and device id.
- */
-static uint read_pci_reg00(struct pci_configuration_register *reg)
+static void show_pci_devices(void)
 {
-	reg->reg_num = 0;
-	return read_pci_data(reg);
-}
+	int i;
+	struct pci_device *p;
 
-/**
- * Read CONFIG_DATA by register 0x04.
- * @param reg it should be set bus, device, function and so forth.
- * @return status.
- */
-//static uint read_pci_command_register(struct pci_configuration_register *reg)
-//{
-//	reg->reg_num = 0x4;
-//	return read_pci_data(reg);
-//}
-
-/**
- * Read CONFIG_DATA by register 0x0c to check if it's PCI brigdge or not.
- * @param reg it should be set bus, device, function and so forth.
- * @return vendor id and device id.
- */
-static uint read_pci_header_type(struct pci_configuration_register *reg)
-{
-	reg->reg_num = 0xc;
-	return read_pci_data(reg);
-}
-
-/**
- * Read CONFIG_DATA by register 0x2c to get its sub system data.
- * @param reg it should be set bus, device, function and so forth.
- * @return sub system.
- */
-static uint read_pci_sub_system(struct pci_configuration_register *reg)
-{
-	reg->reg_num = 0x2c;
-	return read_pci_data(reg);
-}
-
-static void store_pci_device_data(uchar bus, uchar devfn, 
-			 uint data, uchar func,
-			 struct pci_device_info *info)
-{
-	uint class = read_pci_class(&info->reg);
-	uint header = read_pci_header_type(&info->reg);
-	uint subsystem = read_pci_sub_system(&info->reg);
-
-	memset(&info->device, 0, sizeof(info->device));
-
-	info->device.bus = bus;
-	info->device.devfn = devfn;
-	info->device.vendor = data & 0xffff;
-	info->device.devid = (data >> 16) & 0xffff;
-	info->device.pg_if = (class >> 8) & 0xff;
-	info->device.sub_class = (class >> 16) & 0xff;
-	info->device.base_class = (class >> 24) & 0xff;
-	info->device.func = func;
-	info->device.header_type = ((header >> 16) & 0xff) & 0x7f;
-	info->device.multi = (header & 0x800000) ? 1 : 0;
-	info->device.sub_vender = subsystem & 0xffff;
-	info->device.sub_devid = (subsystem >> 16) & 0xffff;
-}
-
-static int find_device(uint vendor, uint bus, uint dev, struct pci_device_info *info)
-{
-	struct pci_configuration_register reg;
-	uint i;
-
-	memset(&reg, 0, sizeof(reg));
-
-	reg.bus_num = bus;
-	reg.dev_num = dev;
-
-	for (i = 0; i < PCI_FUNCTION_MAX; i++) {
-		uint data;
-		reg.func_num = i;
-		data = read_pci_reg00(&reg);
-
-		if ((data & 0xffff) == vendor) {
-			info->reg = reg;
-			store_pci_device_data(bus, dev, data, i, info);
-
-			return 0;
-		}
+	for (i = 0; i < MAX_PCI_DEVICES; i++) {
+		p = &pci_devices[i];
+		if (p->vendor_id)
+			cprintf("[+]%s: vendor(0x%x):device(0x%x), header(0x%x), subsystem vendoer(0x%x), subsystem id(0x%x)\n",
+				__func__,
+				p->vendor_id,
+				p->device_id,
+				p->header_type,
+				p->subsystem_vendor_id,
+				p->subsystem_id);
 	}
-	return -1;
 }
 
-int search_pci_device(uint vendor, struct pci_device_info *info)
+struct pci_device *get_pci_device(ushort vendor, ushort device)
+{
+	int i;
+	struct pci_device *p;
+
+	for (i = 0; i < MAX_PCI_DEVICES; i++) {
+		p = &pci_devices[i];
+		if (p->vendor_id == vendor && p->device_id == device)
+			return p;
+	}
+
+	return NULL;
+}
+
+void pci_init(void)
 {
 	uint bus, dev;
-	int r = -1;
 
 	for (bus = 0; bus < PCI_BUS_MAX; bus++) {
 		for (dev = 0; dev < PCI_DEVICE_MAX; dev++) {
-			r = find_device(vendor, bus, dev, info);
-			if (!r)
-				return r;
+			setup_pci_device(bus, dev);
 		}
 	}
 
-	return r;
+	show_pci_devices();
 }

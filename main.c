@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "virtio.h"
+#include "pci.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
@@ -31,6 +32,7 @@ main(void)
   tvinit();        // trap vectors
   binit();         // buffer cache
   fileinit();      // file table
+  pci_init();      // pci
   virtio_init();   // virtio-blk
   ideinit();       // disk 
   startothers();   // start other processors
