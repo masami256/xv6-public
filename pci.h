@@ -37,7 +37,7 @@ struct pci_device {
 	uchar max_latency;
 };
 
-struct pci_device *get_pci_device(ushort vendor, ushort device);
+struct pci_device *get_pci_device(ushort vendor, ushort device, ushort subsystem_vendor, ushort subsystem_id);
 void pci_init(void);
 
 #endif // _PCI_H

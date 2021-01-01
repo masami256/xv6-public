@@ -115,14 +115,17 @@ static void show_pci_devices(void)
 	}
 }
 
-struct pci_device *get_pci_device(ushort vendor, ushort device)
+struct pci_device *get_pci_device(ushort vendor, ushort device, ushort subsystem_vendor, ushort subsystem_id)
 {
 	int i;
 	struct pci_device *p;
 
 	for (i = 0; i < MAX_PCI_DEVICES; i++) {
 		p = &pci_devices[i];
-		if (p->vendor_id == vendor && p->device_id == device)
+		if (p->vendor_id == vendor && 
+			p->device_id == device &&
+			p->subsystem_vendor_id == subsystem_vendor &&
+			p->subsystem_id == subsystem_id)
 			return p;
 	}
 
