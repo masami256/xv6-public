@@ -62,14 +62,22 @@ static void setup_pci_device(uint bus, uint dev)
 {
 	uint tmp;
 	uint func = 0;
-	struct pci_device *p = &pci_devices[pci_device_idx];
+	struct pci_device *p; 
 
 	tmp = read_pci_config(bus, dev, func, 0);
-	
-	p->vendor_id = tmp & 0xffff;
-	if (p->vendor_id == 0xffff) 
+	if ((tmp & 0xffff) == 0xffff) 
 		return ;
 
+	pci_device_idx++;
+
+	if (pci_device_idx >= MAX_PCI_DEVICES) {
+		cprintf("too many pci devices. skip add pci device\n");
+		return ;
+	}
+
+	p = &pci_devices[pci_device_idx];
+
+	p->vendor_id = tmp & 0xffff;
 	p->device_id = (tmp >> 16) & 0xffff;
 
 	tmp = read_pci_config(bus, dev, func, 0x04);
@@ -93,8 +101,6 @@ static void setup_pci_device(uint bus, uint dev)
 	tmp = read_pci_config(bus, dev, func, 0x2c);
 	p->subsystem_vendor_id = tmp & 0xffff;
 	p->subsystem_id = (tmp >> 16) & 0xffff;
-
-	pci_device_idx++;
 }
 
 static void show_pci_devices(void)
