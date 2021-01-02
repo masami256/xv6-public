@@ -5,7 +5,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
-#include "virtio.h"
+#include "virtio_blk.h"
 #include "pci.h"
 
 static void startothers(void);
@@ -33,7 +33,7 @@ main(void)
   binit();         // buffer cache
   fileinit();      // file table
   pci_init();      // pci
-  virtio_init();   // virtio-blk
+  virtio_blk_init();   // virtio-blk
   ideinit();       // disk 
   startothers();   // start other processors
   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()

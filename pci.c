@@ -101,6 +101,8 @@ static void setup_pci_device(uint bus, uint dev)
 	tmp = read_pci_config(bus, dev, func, 0x2c);
 	p->subsystem_vendor_id = tmp & 0xffff;
 	p->subsystem_id = (tmp >> 16) & 0xffff;
+
+
 }
 
 static void show_pci_devices(void)
@@ -110,7 +112,7 @@ static void show_pci_devices(void)
 
 	for (i = 0; i < MAX_PCI_DEVICES; i++) {
 		p = &pci_devices[i];
-		if (p->vendor_id)
+		if (p->vendor_id) {
 			cprintf("[+]%s: vendor(0x%x):device(0x%x), header(0x%x), subsystem vendoer(0x%x), subsystem id(0x%x)\n",
 				__func__,
 				p->vendor_id,
@@ -118,6 +120,11 @@ static void show_pci_devices(void)
 				p->header_type,
 				p->subsystem_vendor_id,
 				p->subsystem_id);
+			cprintf("bar0:0x%x, bar1:0x%x, bar2:0x%x, bar3:0x%x, bar4:0x%x, bar5:0x%x\n",
+				p->bar[0], p->bar[1],
+				p->bar[2], p->bar[3],
+				p->bar[4], p->bar[5]);
+		}
 	}
 }
 

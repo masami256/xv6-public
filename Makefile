@@ -29,6 +29,7 @@ OBJS = \
 	vm.o\
 	pci.o\
 	virtio.o\
+	virtio_blk.o\
 
 # Cross-compiling (e.g., on Mac OS X)
 # TOOLPREFIX = i386-jos-elf
