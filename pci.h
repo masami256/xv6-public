@@ -19,12 +19,7 @@ struct pci_device {
 	uchar latency_time;
 	uchar header_type;
 	uchar bist;
-	uint bar0;
-	uint bar1;
-	uint bar2;
-	uint bar3;
-	uint bar4;
-	uint bar5;
+	uint bar[6];
 	uint cardbus;
 	ushort subsystem_vendor_id;
 	ushort subsystem_id;

@@ -91,12 +91,12 @@ static void setup_pci_device(uint bus, uint dev)
 	tmp = read_pci_config(bus, dev, func, 0x0c);
 	p->header_type = (tmp >> 16) & 0xff;
 
-	p->bar0 = read_pci_config(bus, dev, func, 0x10);
-	p->bar1 = read_pci_config(bus, dev, func, 0x14);
-	p->bar2 = read_pci_config(bus, dev, func, 0x18);
-	p->bar3 = read_pci_config(bus, dev, func, 0x1c);
-	p->bar4 = read_pci_config(bus, dev, func, 0x20);
-	p->bar5 = read_pci_config(bus, dev, func, 0x24);
+	p->bar[0] = read_pci_config(bus, dev, func, 0x10);
+	p->bar[1] = read_pci_config(bus, dev, func, 0x14);
+	p->bar[2] = read_pci_config(bus, dev, func, 0x18);
+	p->bar[3] = read_pci_config(bus, dev, func, 0x1c);
+	p->bar[4] = read_pci_config(bus, dev, func, 0x20);
+	p->bar[5] = read_pci_config(bus, dev, func, 0x24);
 
 	tmp = read_pci_config(bus, dev, func, 0x2c);
 	p->subsystem_vendor_id = tmp & 0xffff;
