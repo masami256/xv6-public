@@ -113,14 +113,13 @@ static void show_pci_devices(void)
 	for (i = 0; i < MAX_PCI_DEVICES; i++) {
 		p = &pci_devices[i];
 		if (p->vendor_id) {
-			cprintf("[+]%s: vendor(0x%x):device(0x%x), header(0x%x), subsystem vendoer(0x%x), subsystem id(0x%x)\n",
+			cprintf("[+]%s: vendor(0x%x):device(0x%x), header(0x%x), subsystem vendoer(0x%x), subsystem id(0x%x), bar0:0x%x, bar1:0x%x, bar2:0x%x, bar3:0x%x, bar4:0x%x, bar5:0x%x\n",
 				__func__,
 				p->vendor_id,
 				p->device_id,
 				p->header_type,
 				p->subsystem_vendor_id,
-				p->subsystem_id);
-			cprintf("bar0:0x%x, bar1:0x%x, bar2:0x%x, bar3:0x%x, bar4:0x%x, bar5:0x%x\n",
+				p->subsystem_id,
 				p->bar[0], p->bar[1],
 				p->bar[2], p->bar[3],
 				p->bar[4], p->bar[5]);

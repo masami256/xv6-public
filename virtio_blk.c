@@ -2,6 +2,7 @@
 #include "virtio_blk.h"
 #include "virtio.h"
 
+struct virtio_device_info virtio_blk_dev;
 struct pci_device *virtio_pci_dev;
 
 void virtio_blk_init(void)
@@ -14,5 +15,7 @@ void virtio_blk_init(void)
 
 	cprintf("[+]found virtio block device\n");
 
-	virtio_init();
+	virtio_blk_dev.pci = *virtio_pci_dev;
+
+	virtio_init(&virtio_blk_dev);
 }
