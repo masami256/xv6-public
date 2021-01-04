@@ -9,6 +9,15 @@ inb(ushort port)
   return data;
 }
 
+static inline ushort
+inw(ushort port)
+{
+  ushort data;
+  asm volatile("in %1, %0" : "=a" (data) : "dN" (port));
+  return data;
+}
+
+
 static inline uint
 inl(ushort port)
 {
