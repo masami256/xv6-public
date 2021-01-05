@@ -2,6 +2,41 @@
 #include "memlayout.h"
 #include "x86.h"
 
+#if 0
+static void show_device_features(uint bar)
+{
+	uint f = inl(bar + VIRTIO_CFG_OFFSET_DEVICE_FEATURES_BITS);
+	
+	cprintf("[+]device features: ");
+	if (f & VIRTIO_BLK_F_SIZE_MAX)
+		cprintf("VIRTIO_BLK_F_SIZE_MAX ");
+	if (f & VIRTIO_BLK_F_SEG_MAX)
+		cprintf("VIRTIO_BLK_F_SEG_MAX ");
+	if (f & VIRTIO_BLK_F_GEOMETRY)
+		cprintf("VIRTIO_BLK_F_GEOMETRY ");
+	if (f & VIRTIO_BLK_F_RO)
+		cprintf("VIRTIO_BLK_F_RO ");
+	if (f & VIRTIO_BLK_F_BLK_SIZE)
+		cprintf("VIRTIO_BLK_F_BLK_SIZE ");
+	if (f & VIRTIO_BLK_F_FLUSH)
+		cprintf("VIRTIO_BLK_F_FLUSH ");
+	if (f & VIRTIO_BLK_F_TOPOLOGY)
+		cprintf("VIRTIO_BLK_F_TOPOLOGY ");
+	if (f & VIRTIO_BLK_F_CONFIG_WCE)
+		cprintf("VIRTIO_BLK_F_CONFIG_WCE ");
+	if (f & VIRTIO_BLK_F_DISCARD)
+		cprintf("VIRTIO_BLK_F_DISCARD ");
+	if (f & VIRTIO_BLK_F_WRITE_ZEROES)
+		cprintf("VIRTIO_BLK_F_WRITE_ZEROES ");
+	if (f & VIRTIO_BLK_F_BARRIER)
+		cprintf("VIRTIO_BLK_F_BARRIER ");
+	if (f & VIRTIO_BLK_F_SCSI)
+		cprintf("VIRTIO_BLK_F_SCSI ");
+
+	cprintf("\n");
+}
+#endif 
+
 void virtio_init(struct virtio_device_info *dev)
 {
 	uint bar;
