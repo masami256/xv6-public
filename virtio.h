@@ -32,6 +32,30 @@
 #define VIRTIO_CFG_OFFSET_DEVICE_STATUS		18
 #define VIRTIO_CFG_OFFSET_ISR_STATUS 		20
 
+// virtio blk device features bits
+// spec 5.2.3 Feature bits https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-2420003
+#define VIRTIO_BLK_F_SIZE_MAX		1
+#define VIRTIO_BLK_F_SEG_MAX		2
+#define VIRTIO_BLK_F_GEOMETRY		4
+#define VIRTIO_BLK_F_RO				5
+#define VIRTIO_BLK_F_BLK_SIZE		6
+#define VIRTIO_BLK_F_FLUSH			9
+#define VIRTIO_BLK_F_TOPOLOGY		10
+#define VIRTIO_BLK_F_CONFIG_WCE 	11
+#define VIRTIO_BLK_F_DISCARD		13
+#define VIRTIO_BLK_F_WRITE_ZEROES	14
+#define VIRTIO_BLK_F_BARRIER		0
+#define VIRTIO_BLK_F_SCSI			7
+
+// spec 1.4 Structure Specifications https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-80004
+typedef short le16;
+typedef int le32;
+typedef long long le64;
+
+typedef short be16;
+typedef int be32;
+typedef long long be64;
+
 struct virtio_device_info {
 	struct pci_device pci;
 };
