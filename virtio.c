@@ -7,6 +7,8 @@ void virtio_init(struct virtio_device_info *dev)
 	uint bar;
 	uchar status;
 	uint device_features;
+	short q_size;
+	uint q_select;
 
 	cprintf("[+]initialize virtio driver(device:0x%x, subsystem:0x%x)\n", dev->pci.device_id, dev->pci.subsystem_id);
 
@@ -40,6 +42,18 @@ void virtio_init(struct virtio_device_info *dev)
 
 	cprintf("[+]status: 0x%x\n", status);
 
+	for (q_select = 0; q_select < 8; q_select++) {
+		q_size = -1;
+		outl(bar + VIRTIO_CFG_OFFSET_QUEUE_ADDRESS, q_select);
+		q_size = inw(bar + VIRTIO_CFG_OFFSET_QUEUE_SIZE);
+		if (q_size > 0)
+			break;
+	}
+
+	if (q_size < 0) 
+		panic("couldn't find virtqueue\n");
+
+	cprintf("[+]queue size: %d:%d\n", q_select, q_size);
 }
 
 
