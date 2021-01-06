@@ -77,8 +77,7 @@ struct virtq_descriptor {
 struct virtq_available {
 	le16 flags;
 	le16 idx;
-	le16 *ring;
-	le16 used_event;
+	le16 ring[];
 };
 
 // spec 2.6.8 The Virtqueue Used Ring https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-430008
@@ -91,8 +90,7 @@ struct virtq_used_element {
 struct virtq_used {
 	le16 flags;
 	le16 idx;
-	struct virtq_used_element *ring;
-	le16 available_event;
+	struct virtq_used_element ring[];
 };
 
 // spec 2.6.2 Legacy Interfaces: A Note on Virtqueue Layout https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-260002
