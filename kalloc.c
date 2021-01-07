@@ -109,6 +109,9 @@ alloc_pages(uint num_pages)
     kmem.freelist = r->next;
   }
 
+  if (i != num_pages)
+    r = NULL;
+
   if (kmem.use_lock)
     release(&kmem.lock);
 
