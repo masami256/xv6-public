@@ -115,17 +115,17 @@ alloc_pages(uint num_pages)
 
         r = kmem.freelist;   
       }
-    }
 
-    if (i == num_pages - 1) {
-      r = start;
-      cprintf("[+]allocated %d contiguous pages\n", num_pages); 
-      for (i = 0; i < num_pages; i++) {
-        cprintf("[+]page %d : virtual:0x%x, physical:0x%x\n", i, r, V2P(r));
-        kmem.freelist = r->next;
-	r = kmem.freelist;
+      if (i == num_pages - 1) {
+        r = start;
+        cprintf("[+]allocated %d contiguous pages\n", num_pages); 
+        for (i = 0; i < num_pages; i++) {
+          cprintf("[+]page %d : virtual:0x%x, physical:0x%x\n", i, r, V2P(r));
+          kmem.freelist = r->next;
+	  r = kmem.freelist;
+        }
+        break;
       }
-      break;
     }
   } while (r);
 
