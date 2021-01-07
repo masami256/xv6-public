@@ -94,3 +94,44 @@ kalloc(void)
   return (char*)r;
 }
 
+char*
+alloc_pages(uint num_pages)
+{
+  struct run *r = NULL;
+  struct run *start = NULL;
+  uint i = 0;
+
+  if (kmem.use_lock)
+    acquire(&kmem.lock);
+
+  do {
+    r = kmem.freelist;
+    if (r) {
+
+      start = r;
+      for (i = 1; i < num_pages - 1; i++) {
+        if (!r->next)
+          break;  
+
+        r = kmem.freelist;   
+      }
+    }
+
+    if (i == num_pages - 1) {
+      r = start;
+      cprintf("[+]allocated %d contiguous pages\n", num_pages); 
+      for (i = 0; i < num_pages; i++) {
+        cprintf("[+]page %d : virtual:0x%x, physical:0x%x\n", i, r, V2P(r));
+        kmem.freelist = r->next;
+	r = kmem.freelist;
+      }
+      break;
+    }
+  } while (r);
+
+  if (kmem.use_lock)
+    release(&kmem.lock);
+
+  return (char*)r;
+}
+
