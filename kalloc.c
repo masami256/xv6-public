@@ -105,6 +105,9 @@ alloc_pages(uint num_pages)
 
   for (i = 0; i < num_pages; i++) {
     r = kmem.freelist;   
+    if (!r)
+	    break;
+
     cprintf("[+]page %d : virtual:0x%x, physical:0x%x\n", i, r, V2P(r));
     kmem.freelist = r->next;
   }
