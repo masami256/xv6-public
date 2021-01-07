@@ -124,6 +124,7 @@ alloc_pages(uint num_pages)
           kmem.freelist = r->next;
 	  r = kmem.freelist;
         }
+	r = start;
         break;
       }
     }
