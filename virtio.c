@@ -6,7 +6,7 @@ static struct virtq virtq;
 #define PAGE_SIZE 4096
 #define PAGE_SIZE_ROUND_UP(x) ((((x)) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1))) 
 
-#if 0
+#if 1
 static void show_device_features(uint bar)
 {
 	uint f = inl(bar + VIRTIO_CFG_OFFSET_DEVICE_FEATURES_BITS);
@@ -122,7 +122,13 @@ void virtio_init(struct virtio_device_info *dev)
 	// step7: write dirvers ok bit
 	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE | VIRTIO_STATUS_DRIVER | VIRTIO_STATUS_FEATURES_OK | VIRTIO_STATUS_DRIVER_OK);
 
+	status = inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS);
+	if (status == VIRTIO_STATUS_FAILD)
+		panic("failed to setup virtio driver\n");
+
 	cprintf("[+]VIRTIO_CFG_OFFSET_DEVICE_STATUS: 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
+	cprintf("[+]virtio driver initialize done.\n");
+	show_device_features(bar);
 }
 
 
