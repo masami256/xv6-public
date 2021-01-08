@@ -2,6 +2,10 @@
 #include "memlayout.h"
 #include "x86.h"
 
+static struct virtq virtq;
+#define PAGE_SIZE 4096
+#define PAGE_SIZE_ROUND_UP(x) ((((x)) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1))) 
+
 #if 0
 static void show_device_features(uint bar)
 {
@@ -44,6 +48,10 @@ void virtio_init(struct virtio_device_info *dev)
 	uint device_features;
 	short q_size;
 	uint q_select;
+	uint total_size = 0;
+	uint desc_size = 0;
+	uint avail_size = 0;
+	uint total_pages = 0;
 
 	cprintf("[+]initialize virtio driver(device:0x%x, subsystem:0x%x)\n", dev->pci.device_id, dev->pci.subsystem_id);
 
@@ -58,17 +66,16 @@ void virtio_init(struct virtio_device_info *dev)
 
 	// step1: Set ACKNOWLEDGE status bit
 	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE);
-	status = inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS);
 
 	// step2: Set DRIVER status bit
-	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, status | VIRTIO_STATUS_DRIVER);
+	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE | VIRTIO_STATUS_DRIVER);
 
 	// step3: read device features bit
 	device_features = inl(bar + VIRTIO_CFG_OFFSET_DEVICE_FEATURES_BITS);
 	cprintf("[+]device features: 0x%x\n", device_features);
 
 	// step4 set FEATURES_OK status bit
-	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, status | VIRTIO_STATUS_FEATURES_OK);
+	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE | VIRTIO_STATUS_DRIVER | VIRTIO_STATUS_FEATURES_OK);
 
 	// step5: read device status field and check FEATURES_OK bit still on
 	status = inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS);
@@ -89,6 +96,33 @@ void virtio_init(struct virtio_device_info *dev)
 		panic("couldn't find virtqueue\n");
 
 	cprintf("[+]queue size: %d:%d\n", q_select, q_size);
+
+	desc_size = (PAGE_SIZE_ROUND_UP(16 * q_size));
+	avail_size = PAGE_SIZE_ROUND_UP(6 + 2 * q_size);
+	total_size = desc_size + avail_size + (PAGE_SIZE_ROUND_UP(6 + 8 * q_size));
+	total_pages = total_size / PAGE_SIZE;
+	cprintf("[+]total size: %d, desc_size: %d, required pages: %d\n", total_size, desc_size, total_pages);
+
+	virtq.desc = (struct virtq_descriptor *) alloc_pages(total_pages);
+	if (!virtq.desc)
+		panic("failed to allocate virtq descriptor]n");
+
+	virtq.avail = (struct virtq_available *) ((uint) virtq.desc + desc_size);
+	virtq.used = (struct virtq_used *) ((uint) virtq.avail + avail_size);
+        cprintf("[+]virtq->desc physical address 0x%x\n", V2P(virtq.desc));
+        cprintf("[+]virtq->avail physical address 0x%x\n", V2P(virtq.avail));
+        cprintf("[+]virtq->used physical address 0x%x\n", V2P(virtq.used));
+
+	// step6: setup queue address
+	outl(bar + VIRTIO_CFG_OFFSET_QUEUE_ADDRESS, V2P(virtq.desc));
+	cprintf("[+]virtio queue physical address 0x%x\n", inl(bar + VIRTIO_CFG_OFFSET_QUEUE_ADDRESS));
+
+	virtq.avail->flags = 0;
+
+	// step7: write dirvers ok bit
+	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE | VIRTIO_STATUS_DRIVER | VIRTIO_STATUS_FEATURES_OK | VIRTIO_STATUS_DRIVER_OK);
+
+	cprintf("[+]VIRTIO_CFG_OFFSET_DEVICE_STATUS: 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
 }
 
 

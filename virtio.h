@@ -19,8 +19,8 @@
 #define VIRTIO_STATUS_DRIVER		2
 #define VIRTIO_STATUS_FAILD		128
 #define VIRTIO_STATUS_FEATURES_OK	8
-#define VIRTIO_DRIVER_OK		4
-#define VIRTIO_DEVICE_NEEDS_RESET	64
+#define VIRTIO_STATUS_DRIVER_OK		4
+#define VIRTIO_STATUS_DEVICE_NEEDS_RESET	64
 
 // spec 4.1.4.8 Legacy Interfaces: A Note on PCI Device Layout https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-1250008
 #define VIRTIO_CFG_OFFSET_DEVICE_FEATURES_BITS	0
