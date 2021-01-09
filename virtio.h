@@ -47,6 +47,7 @@
 #define VIRTIO_BLK_F_BARRIER		0
 #define VIRTIO_BLK_F_SCSI			7
 
+#define VIRTIO_DEVICE_SPECIFIC_REGISTER_OFFSET 0x14
 
 // spec 1.4 Structure Specifications https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-80004
 typedef short le16;
