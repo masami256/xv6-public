@@ -134,6 +134,10 @@ void virtio_init(struct virtio_device_info *dev)
 	cprintf("[+]final device status: 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
 	cprintf("[+]virtio driver initialize done.\n");
 	show_device_features(bar);
+
+	cprintf("total sector: 0x%x\n", inl(bar + VIRTIO_DEVICE_SPECIFIC_REGISTER_OFFSET));
+	cprintf("segment size: 0x%x\n", inl(bar + 0x1c));
+	cprintf("segment count: 0x%x\n", inl(bar + 0x20));
 }
 
 
