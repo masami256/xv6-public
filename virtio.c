@@ -53,7 +53,6 @@ void virtio_init(struct virtio_device_info *dev)
 	uint avail_size = 0;
 	uint total_pages = 0;
 
-	cprintf("[+]initialize virtio driver(device:0x%x, subsystem:0x%x)\n", dev->pci.device_id, dev->pci.subsystem_id);
 
 	// https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-1250008
 	// https://wiki.osdev.org/Pci#Base_Address_Registers
@@ -63,6 +62,12 @@ void virtio_init(struct virtio_device_info *dev)
 		panic("this device is somthing wrong\n");
 	bar &= 0xfffffffc;
 	cprintf("[+]I/O address space: 0x%x\n", bar);
+
+	cprintf("[+]initialize virtio driver(device:0x%x, subsystem:0x%x)\n", dev->pci.device_id, dev->pci.subsystem_id);
+	cprintf("[+]initial device status 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
+	cprintf("[+]reset the device\n");
+	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, 0);
+	cprintf("[+]reset result 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
 
 	// step1: Set ACKNOWLEDGE status bit
 	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE);
@@ -126,7 +131,7 @@ void virtio_init(struct virtio_device_info *dev)
 	if (status == VIRTIO_STATUS_FAILD)
 		panic("failed to setup virtio driver\n");
 
-	cprintf("[+]VIRTIO_CFG_OFFSET_DEVICE_STATUS: 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
+	cprintf("[+]final device status: 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
 	cprintf("[+]virtio driver initialize done.\n");
 	show_device_features(bar);
 }
