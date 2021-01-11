@@ -128,7 +128,7 @@ void virtio_init(struct virtio_device_info *dev)
 	outb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS, VIRTIO_STATUS_ACKNOWLEDGE | VIRTIO_STATUS_DRIVER | VIRTIO_STATUS_FEATURES_OK | VIRTIO_STATUS_DRIVER_OK);
 
 	status = inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS);
-	if (status == VIRTIO_STATUS_FAILD)
+	if ((status == VIRTIO_STATUS_FAILD) || !(status & VIRTIO_STATUS_FEATURES_OK))
 		panic("failed to setup virtio driver\n");
 
 	cprintf("[+]final device status: 0x%x\n", inb(bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS));
