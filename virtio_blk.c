@@ -83,7 +83,7 @@ void virtio_blk_init(void)
 	set_device_status(&vdev, status);
 
 	// step3: read device features bit
-	device_features = get_device_base_address(&vdev);
+	device_features = get_device_feature(&vdev);
 	cprintf("[+]device features: 0x%x\n", device_features);
 
 	set_driver_features(&vdev, device_features);
