@@ -5,6 +5,9 @@
 #include "defs.h"
 #include "pci.h"
 
+#define PAGE_SIZE 4096
+#define PAGE_SIZE_ROUND_UP(x) ((((x)) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1))) 
+
 // spec 4.1.2 PCI Device Discovery https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-1020002
 #define VIRTIO_VENDOR 0x1AF4
 
@@ -58,9 +61,6 @@ typedef short be16;
 typedef int be32;
 typedef long long be64;
 
-struct virtio_device_info {
-	struct pci_device pci;
-};
 
 // spec 2.6.5 The Virtqueue Descriptor Table https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-320005
 #define VIRTQ_DESC_F_NEXT		1
@@ -102,6 +102,29 @@ struct virtq {
 	struct virtq_used *used;
 };
 
-void virtio_init(struct virtio_device_info *dev);
+struct virtio_pci_device_info {
+	ushort vendor;
+	ushort device;
+	ushort subsystem_vendor;
+	ushort subsystem_id;
+};
+
+struct virtio_device {
+	struct pci_device *pci;
+	struct virtio_pci_device_info pci_info;
+	uint bar; // base address for the device
+	struct virtq queue;
+};
+
+uint get_device_base_address(struct virtio_device *udev);
+uint get_device_feature(struct virtio_device *vdev);
+void set_driver_features(struct virtio_device *vdev, uint features);
+uchar get_device_status(struct virtio_device *vdev);
+void set_device_status(struct virtio_device *vdev, uint status);
+void select_virt_queue(struct virtio_device *vdev, uint q_select);
+short get_queue_size(struct virtio_device *vdev);
+void set_queue_address(struct virtio_device *vdev);
+uint get_queue_address(struct virtio_device *vdev);
+void virtio_init(struct virtio_device *vdev);
 
 #endif // _VIRTIO_H
