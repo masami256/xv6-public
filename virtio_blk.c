@@ -5,6 +5,25 @@
 #include "memlayout.h"
 
 static struct virtio_device vdev;
+static struct virtio_blk_info blk_info;
+
+static void virtio_read_block_device_info(struct virtio_device *vdev, struct virtio_blk_info *blk_info)
+{
+	uint h, l;
+
+	h = inl(vdev->bar + VIRTIO_BLK_TOTAL_SECTOR_COUNT + 4);
+	l = inl(vdev->bar + VIRTIO_BLK_TOTAL_SECTOR_COUNT);
+
+	blk_info->total_sector_count = h;
+	blk_info->total_sector_count = (blk_info->total_sector_count << 32) | l;
+
+	blk_info->segment_size = inl(vdev->bar + VIRTIO_BLK_MAX_SEGMENT_SIZE);
+	blk_info->segment_count = inl(vdev->bar +  VIRTIO_BLK_MAX_SEGMENT_COUNT);
+	blk_info->cylinder_count = inw(vdev->bar + VIRTIO_BLK_CYLINDER_COUNT);
+	blk_info->head_count = inb(vdev->bar + VIRTIO_BLK_HEAD_COUNT);
+	blk_info->sector_count = inb(vdev->bar + VIRTIO_BLK_SECTOR_COUNT);
+	blk_info->block_length = inb(vdev->bar + VIRTIO_BLK_BLOCK_LENGTH);
+}
 
 static void virt_queue_init(struct virtio_device *vdev)
 {
@@ -50,7 +69,7 @@ static void virt_queue_init(struct virtio_device *vdev)
 	q->avail->flags = 0;
 }
 
-void virtio_blk_init(void)
+static void virtio_init_driver(void)
 {
 	uint device_features;
 	cprintf("[+]setup virtio block device\n");
@@ -114,9 +133,19 @@ void virtio_blk_init(void)
 	cprintf("[+]final device status: 0x%x\n", status);
 	cprintf("[+]virtio driver initialize done.\n");
 
-	cprintf("total sector: 0x%x\n", inl(vdev.bar + VIRTIO_DEVICE_SPECIFIC_REGISTER_OFFSET));
-	cprintf("segment size: 0x%x\n", inl(vdev.bar + 0x1c));
-	cprintf("segment count: 0x%x\n", inl(vdev.bar + 0x20));
 
+}
 
+void virtio_blk_init(void)
+{
+	virtio_init_driver();
+	virtio_read_block_device_info(&vdev, &blk_info);
+
+	cprintf("total sector: 0x%x\n", blk_info.total_sector_count);
+	cprintf("max segment size: 0x%x\n", blk_info.segment_size);
+	cprintf("max segment count: 0x%x\n", blk_info.segment_count);
+	cprintf("cylinder count: 0x%x\n", blk_info.cylinder_count);
+	cprintf("head count: 0x%x\n", blk_info.head_count);
+	cprintf("sector count: 0x%x\n", blk_info.sector_count);
+	cprintf("block length: 0x%x\n", blk_info.block_length);
 }
