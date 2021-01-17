@@ -5,7 +5,6 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
-#include "virtio_blk.h"
 #include "pci.h"
 
 static void startothers(void);
