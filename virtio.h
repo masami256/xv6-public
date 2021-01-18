@@ -102,7 +102,7 @@ struct virtio_device {
 	struct virtq queue;
 };
 
-uint get_device_base_address(struct virtio_device *udev);
+uint get_device_base_address(struct virtio_device *vdev);
 uint get_device_feature(struct virtio_device *vdev);
 void set_driver_features(struct virtio_device *vdev, uint features);
 uchar get_device_status(struct virtio_device *vdev);
