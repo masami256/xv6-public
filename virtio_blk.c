@@ -113,8 +113,6 @@ static void virtio_init_driver(struct virtio_device *vdev)
 	device_features = get_device_feature(vdev);
 	cprintf("[+]device features: 0x%x\n", device_features);
 
-	set_driver_features(vdev, device_features);
-
 	// step4 set FEATURES_OK status bia
 	status |= VIRTIO_STATUS_FEATURES_OK;
 	set_device_status(vdev, status);

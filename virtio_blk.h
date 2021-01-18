@@ -27,6 +27,13 @@
 #define VIRTIO_BLK_SECTOR_COUNT		0x27
 #define VIRTIO_BLK_BLOCK_LENGTH		0x28
 
+// request type https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-2500006
+#define VIRTIO_BLK_T_IN			0
+#define VIRTIO_BLK_T_OUT		1
+#define VIRTIO_BLK_T_FLUSH		4
+#define VIRTIO_BLK_T_DISCARD		11
+#define VIRTIO_BLK_T_WRITE_ZEROES	13
+
 // https://wiki.osdev.org/Virtio#Block_Device_Registers
 struct virtio_blk_info {
 	le64 total_sector_count;
@@ -36,6 +43,15 @@ struct virtio_blk_info {
 	uchar head_count;
 	uchar sector_count;
 	uchar block_length;
+};
+
+// https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-2500006
+struct virtio_blk_req {
+	le32 type;
+	le32 reserved;
+	le64 sector;
+	uchar *data;
+	uchar status;
 };
 
 void virtio_blk_init(void);
