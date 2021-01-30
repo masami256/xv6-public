@@ -50,7 +50,7 @@ struct virtio_blk_req {
 	le32 type;
 	le32 reserved;
 	le64 sector;
-	uchar *data;
+	uchar data[512];
 	uchar status;
 };
 
