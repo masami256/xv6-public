@@ -114,7 +114,6 @@ uint get_queue_address(struct virtio_device *vdev);
 
 
 void virtio_init_driver_common(struct virtio_device *vdev);
-void virt_queue_init(struct virtio_device *vdev);
 void virtio_init(struct virtio_device *vdev);
 
 #endif // _VIRTIO_H

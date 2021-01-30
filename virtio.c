@@ -53,6 +53,50 @@ uint get_device_base_address(struct virtio_device *vdev)
 	return bar &= 0xfffffffc;
 }
 
+static void virt_queue_init(struct virtio_device *vdev)
+{
+	struct virtq *q = &vdev->queue;
+	short q_size;
+	uint q_select;
+	uint total_size = 0;
+	uint desc_size = 0;
+	uint avail_size = 0;
+	uint total_pages = 0;
+
+	for (q_select = 0; q_select < 8; q_select++) {
+		q_size = -1;
+		select_virt_queue(vdev, q_select);
+		q_size = get_queue_size(vdev);
+		if (q_size > 0) {
+			cprintf("[+}q_select:0x%x, q_size:0x%x\n", q_select, q_size);
+			break;
+		}
+	}
+
+	if (q_size < 0) 
+		panic("couldn't find virtqueue\n");
+
+	cprintf("[+]queue size: %d:%d\n", q_select, q_size);
+
+	desc_size = (PAGE_SIZE_ROUND_UP(16 * q_size));
+	avail_size = PAGE_SIZE_ROUND_UP(6 + 2 * q_size);
+	total_size = desc_size + avail_size + (PAGE_SIZE_ROUND_UP(6 + 8 * q_size));
+	total_pages = total_size / PAGE_SIZE;
+	cprintf("[+]total size: %d, desc_size: %d, required pages: %d\n", total_size, desc_size, total_pages);
+
+	q->desc = (struct virtq_descriptor *) alloc_pages(total_pages);
+	if (!q->desc)
+		panic("failed to allocate virtq descriptor]n");
+
+	q->avail = (struct virtq_available *) ((uint) q->desc + desc_size);
+	q->used = (struct virtq_used *) ((uint) q->avail + avail_size);
+        cprintf("[+]virtq->desc physical address 0x%x\n", V2P(q->desc));
+        cprintf("[+]virtq->avail physical address 0x%x\n", V2P(q->avail));
+        cprintf("[+]virtq->used physical address 0x%x\n", V2P(q->used));
+
+	q->avail->flags = 0;
+}
+
 void virtio_init_driver_common(struct virtio_device *vdev)
 {
 	uint device_features;
@@ -110,50 +154,6 @@ void virtio_init_driver_common(struct virtio_device *vdev)
 	cprintf("[+]final device status: 0x%x\n", status);
 	cprintf("[+]virtio driver initialize done.\n");
 }
-void virt_queue_init(struct virtio_device *vdev)
-{
-	struct virtq *q = &vdev->queue;
-	short q_size;
-	uint q_select;
-	uint total_size = 0;
-	uint desc_size = 0;
-	uint avail_size = 0;
-	uint total_pages = 0;
-
-	for (q_select = 0; q_select < 8; q_select++) {
-		q_size = -1;
-		select_virt_queue(vdev, q_select);
-		q_size = get_queue_size(vdev);
-		if (q_size > 0) {
-			cprintf("[+}q_select:0x%x, q_size:0x%x\n", q_select, q_size);
-			break;
-		}
-	}
-
-	if (q_size < 0) 
-		panic("couldn't find virtqueue\n");
-
-	cprintf("[+]queue size: %d:%d\n", q_select, q_size);
-
-	desc_size = (PAGE_SIZE_ROUND_UP(16 * q_size));
-	avail_size = PAGE_SIZE_ROUND_UP(6 + 2 * q_size);
-	total_size = desc_size + avail_size + (PAGE_SIZE_ROUND_UP(6 + 8 * q_size));
-	total_pages = total_size / PAGE_SIZE;
-	cprintf("[+]total size: %d, desc_size: %d, required pages: %d\n", total_size, desc_size, total_pages);
-
-	q->desc = (struct virtq_descriptor *) alloc_pages(total_pages);
-	if (!q->desc)
-		panic("failed to allocate virtq descriptor]n");
-
-	q->avail = (struct virtq_available *) ((uint) q->desc + desc_size);
-	q->used = (struct virtq_used *) ((uint) q->avail + avail_size);
-        cprintf("[+]virtq->desc physical address 0x%x\n", V2P(q->desc));
-        cprintf("[+]virtq->avail physical address 0x%x\n", V2P(q->avail));
-        cprintf("[+]virtq->used physical address 0x%x\n", V2P(q->used));
-
-	q->avail->flags = 0;
-}
-
 
 void virtio_init(struct virtio_device *vdev)
 {
