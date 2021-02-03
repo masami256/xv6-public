@@ -82,6 +82,7 @@ struct virtq_used {
 
 // spec 2.6.2 Legacy Interfaces: A Note on Virtqueue Layout https://docs.oasis-open.org/virtio/virtio/v1.1/cs01/virtio-v1.1-cs01.html#x1-260002
 struct virtq {
+	short qsize;
 	struct virtq_descriptor *desc;
 	struct virtq_available *avail;
 	struct virtq_used *used;

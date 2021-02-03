@@ -11,6 +11,7 @@ void virtio_blk_read(struct virtio_device *vdev, struct virtio_blk_info *blk_inf
 {
 	vdev->queue.desc[0].len = 512;
 	vdev->queue.desc[0].flags = VIRTQ_DESC_F_NEXT | VIRTQ_DESC_F_WRITE;
+
 }
 
 static void virtio_read_block_device_info(struct virtio_device *vdev, struct virtio_blk_info *blk_info)

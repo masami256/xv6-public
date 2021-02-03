@@ -67,16 +67,16 @@ static void virt_queue_init(struct virtio_device *vdev)
 		q_size = -1;
 		select_virt_queue(vdev, q_select);
 		q_size = get_queue_size(vdev);
-		if (q_size > 0) {
-			cprintf("[+}q_select:0x%x, q_size:0x%x\n", q_select, q_size);
+		if (q_size > 0)
 			break;
-		}
 	}
 
 	if (q_size < 0) 
 		panic("couldn't find virtqueue\n");
 
-	cprintf("[+]queue size: %d:%d\n", q_select, q_size);
+	q->qsize = q_size;
+
+	cprintf("[+]queue size: q_select(%d):q_size(%d)\n", q_select, vdev->queue.qsize);
 
 	desc_size = (PAGE_SIZE_ROUND_UP(16 * q_size));
 	avail_size = PAGE_SIZE_ROUND_UP(6 + 2 * q_size);
@@ -90,6 +90,9 @@ static void virt_queue_init(struct virtio_device *vdev)
 
 	q->avail = (struct virtq_available *) ((uint) q->desc + desc_size);
 	q->used = (struct virtq_used *) ((uint) q->avail + avail_size);
+
+	memset(q->desc, 0x0, total_size);
+	
         cprintf("[+]virtq->desc physical address 0x%x\n", V2P(q->desc));
         cprintf("[+]virtq->avail physical address 0x%x\n", V2P(q->avail));
         cprintf("[+]virtq->used physical address 0x%x\n", V2P(q->used));
