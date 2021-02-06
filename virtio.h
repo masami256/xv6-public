@@ -4,6 +4,10 @@
 #include "types.h"
 #include "defs.h"
 #include "pci.h"
+#include "spinlock.h"
+#include "sleeplock.h"
+#include "fs.h"
+#include "buf.h"
 
 #define PAGE_SIZE 4096
 #define PAGE_SIZE_ROUND_UP(x) ((((x)) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1))) 
@@ -102,6 +106,8 @@ struct virtio_device {
 	struct virtq queue;
 };
 
+void set_queueno_notify(struct virtio_device *vdev, ushort queue_index);
+uint get_queue_notify(struct virtio_device *vdev);
 uint get_device_base_address(struct virtio_device *vdev);
 uint get_device_feature(struct virtio_device *vdev);
 void set_driver_features(struct virtio_device *vdev, uint features);
@@ -111,6 +117,7 @@ void select_virt_queue(struct virtio_device *vdev, uint q_select);
 short get_queue_size(struct virtio_device *vdev);
 void set_queue_address(struct virtio_device *vdev);
 uint get_queue_address(struct virtio_device *vdev);
+uchar get_isr_status(struct virtio_device *vdev);
 
 
 void virtio_init_driver_common(struct virtio_device *vdev);

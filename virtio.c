@@ -1,6 +1,24 @@
 #include "virtio.h"
 #include "x86.h"
 #include "memlayout.h"
+#include "traps.h"
+
+extern int ncpu;
+
+void virtio_intr(void)
+{
+	cprintf("[+]%s\n", __func__);
+}
+
+void set_queueno_notify(struct virtio_device *vdev, ushort queue_index)
+{
+	outl(vdev->bar + VIRTIO_CFG_OFFSET_QUEUE_NOTIFY, queue_index);
+}
+
+uint get_queue_notify(struct virtio_device *vdev)
+{
+	return inl(vdev->bar + VIRTIO_CFG_OFFSET_QUEUE_NOTIFY);
+}
 
 uint get_queue_address(struct virtio_device *vdev)
 {
@@ -40,6 +58,11 @@ uint get_device_feature(struct virtio_device *vdev)
 uchar get_device_status(struct virtio_device *vdev)
 {
 	return inb(vdev->bar + VIRTIO_CFG_OFFSET_DEVICE_STATUS);
+}
+
+uchar get_isr_status(struct virtio_device *vdev)
+{
+	return inb(vdev->bar + VIRTIO_CFG_OFFSET_ISR_STATUS);
 }
 
 uint get_device_base_address(struct virtio_device *vdev)
@@ -164,6 +187,8 @@ void virtio_init(struct virtio_device *vdev)
 			vdev->pci_info.subsystem_vendor, vdev->pci_info.subsystem_id);
 	if (!vdev->pci)
 		panic("[*]cannot found virtio pci device\n");
+
+	ioapicenable(IRQ_VIRTIO, ncpu - 1);
 }
 
 

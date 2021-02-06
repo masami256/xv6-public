@@ -7,10 +7,18 @@
 static struct virtio_device vdev;
 static struct virtio_blk_info blk_info;
 
+void virtio_blk_rw(struct buf *buf)
+{
+	cprintf("[+]%s\n", __func__);
+}
+
 void virtio_blk_read(struct virtio_device *vdev, struct virtio_blk_info *blk_info)
 {
 	vdev->queue.desc[0].len = 512;
 	vdev->queue.desc[0].flags = VIRTQ_DESC_F_NEXT | VIRTQ_DESC_F_WRITE;
+
+	set_queueno_notify(vdev, 0);
+	cprintf("[+]ISR status: 0x%x\n", get_isr_status(vdev));
 
 }
 

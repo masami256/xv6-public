@@ -57,7 +57,7 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_IRQ0 + IRQ_IDE:
-    ideintr();
+    virtio_intr();
     lapiceoi();
     break;
   case T_IRQ0 + IRQ_IDE+1:

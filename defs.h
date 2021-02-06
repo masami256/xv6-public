@@ -54,9 +54,9 @@ void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
 
 // ide.c
-void            ideinit(void);
-void            ideintr(void);
-void            iderw(struct buf*);
+//void            ideinit(void);
+//void            ideintr(void);
+//void            iderw(struct buf*);
 
 // ioapic.c
 void            ioapicenable(int irq, int cpu);
@@ -188,6 +188,10 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // virtio_blk.c
 void            virtio_blk_init(void);
+void            virtio_blk_rw(struct buf*);
+
+// virtio.c
+void            virtio_intr(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
