@@ -188,7 +188,7 @@ void virtio_init(struct virtio_device *vdev)
 	if (!vdev->pci)
 		panic("[*]cannot found virtio pci device\n");
 
-	ioapicenable(IRQ_VIRTIO, ncpu - 1);
+	ioapicenable(vdev->pci->interupt_line, ncpu - 1);
 }
 
 
